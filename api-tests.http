@@ -1,0 +1,40 @@
+@baseUrl = http://localhost:5003/api
+
+### Health Check
+GET {{baseUrl}}/health
+
+### Add a like
+POST {{baseUrl}}/likes
+Content-Type: application/json
+
+{
+  "postId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "userId": "user123"
+}
+
+### Unlike a post
+POST {{baseUrl}}/likes/unlike
+Content-Type: application/json
+
+{
+  "postId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "userId": "user123"
+}
+
+### Get likes by post
+GET {{baseUrl}}/likes/post/3fa85f64-5717-4562-b3fc-2c963f66afa6
+
+### Get like count by post
+GET {{baseUrl}}/likes/post/3fa85f64-5717-4562-b3fc-2c963f66afa6/count
+
+### Get user IDs who liked a post
+GET {{baseUrl}}/likes/post/3fa85f64-5717-4562-b3fc-2c963f66afa6/users
+
+### Get likes by user
+GET {{baseUrl}}/likes/user/user123
+
+### Get post IDs liked by a user
+GET {{baseUrl}}/likes/user/user123/posts
+
+### Check if a user liked a post
+GET {{baseUrl}}/likes/check?userId=user123&postId=3fa85f64-5717-4562-b3fc-2c963f66afa6 

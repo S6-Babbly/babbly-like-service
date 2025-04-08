@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35828.75 d17.13
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "babbly-like-service", "WebApplication1\babbly-like-service.csproj", "{DC76F510-2B68-4B4C-B618-A4B7CDA1D894}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DC76F510-2B68-4B4C-B618-A4B7CDA1D894}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC76F510-2B68-4B4C-B618-A4B7CDA1D894}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC76F510-2B68-4B4C-B618-A4B7CDA1D894}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC76F510-2B68-4B4C-B618-A4B7CDA1D894}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A98CDE12-7C66-4DB9-AE33-41E191D7CD51}
+	EndGlobalSection
+EndGlobal
