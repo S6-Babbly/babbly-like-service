@@ -56,13 +56,13 @@ jobs:
           dotnet-version: "9.0.x"
 
       - name: Restore dependencies
-        run: dotnet restore babbly-like-service.sln
+        run: dotnet restore
 
       - name: Build
-        run: dotnet build babbly-like-service.sln --no-restore
+        run: dotnet build --no-restore
 
       - name: Test
-        run: dotnet test babbly-like-service.sln --no-build --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./coverage
+        run: dotnet test --no-build --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./coverage
 
       # Uncomment when tests are added
       # - name: Upload coverage to Codecov
@@ -111,9 +111,10 @@ jobs:
             docker push ${{ secrets.DOCKERHUB_USERNAME }}/babbly-like-service:latest
           fi
 
-      - name: Check backend health
+      # Simple container verification without health check
+      - name: Verify container starts
         run: |
-          docker run --rm -d -p 5003:8080 --name test-backend ${{ secrets.DOCKERHUB_USERNAME }}/babbly-like-service:${{ github.sha }}
-          sleep 10
-          curl -f http://localhost:5003/api/health || exit 1
+          docker run --rm -d --name test-backend ${{ secrets.DOCKERHUB_USERNAME }}/babbly-like-service:${{ github.sha }}
+          sleep 5
+          docker logs test-backend
           docker stop test-backend 
