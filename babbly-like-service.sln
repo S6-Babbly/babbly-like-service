@@ -1,9 +1,8 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.13.35828.75 d17.13
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "babbly-like-service", "WebApplication1\babbly-like-service.csproj", "{DC76F510-2B68-4B4C-B618-A4B7CDA1D894}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "babbly-like-service", "babbly-like-service\babbly-like-service.csproj", "{DC76F510-2B68-4B4C-B618-A4B7CDA1D894}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
