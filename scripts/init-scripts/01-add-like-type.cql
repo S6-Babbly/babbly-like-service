@@ -1,2 +1,0 @@
--- This migration has been integrated into the initial schema init-cassandra.cql
--- No need for a separate migration file anymore 
