@@ -36,4 +36,4 @@ services:
     command: ["sh", "-c", "docker-entrypoint.sh cassandra -f & (sleep 60 && echo 'Running init scripts...' && for f in /docker-entrypoint-initdb.d/*.cql; do echo Executing $$f; cqlsh -f $$f; done) & wait"]
 
 volumes:
-  cassandra_data: 
+  cassandra_data:

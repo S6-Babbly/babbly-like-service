@@ -6,10 +6,9 @@ EXPOSE 8080
 
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
-COPY ["babbly-like-service/babbly-like-service.csproj", "babbly-like-service/"]
-RUN dotnet restore "babbly-like-service/babbly-like-service.csproj"
+COPY ["babbly-like-service.csproj", "./"]
+RUN dotnet restore "babbly-like-service.csproj"
 COPY . .
-WORKDIR "/src/babbly-like-service"
 RUN dotnet build "babbly-like-service.csproj" -c Release -o /app/build
 
 FROM build AS publish
