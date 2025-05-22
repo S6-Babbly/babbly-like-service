@@ -108,7 +108,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
         with:
-          context: ./babbly-like-service
+          context: babbly-like-service
           file: ./babbly-like-service/Dockerfile
           push: true
           tags: |
