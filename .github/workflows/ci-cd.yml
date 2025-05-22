@@ -108,8 +108,8 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
         with:
-          context: babbly-like-service
-          file: ./babbly-like-service/Dockerfile
+          context: .
+          file: ./Dockerfile
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
