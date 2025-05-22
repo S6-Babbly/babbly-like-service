@@ -62,7 +62,7 @@ jobs:
         shell: powershell
         run: |
           .\.sonar\scanner\dotnet-sonarscanner begin /k:"S6-Babbly_babbly-like-service" /o:"babblyisgeweldig" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.sources="." /d:sonar.exclusions="**/node_modules/**,**/bin/**,**/obj/**,**/*.test.js,**/*.spec.js,**/k8s/**"
-          dotnet build ./babbly-like-service/babbly-like-service.csproj
+          dotnet build ./babbly-like-service.csproj
           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
 
   backend-tests:
@@ -77,13 +77,13 @@ jobs:
           dotnet-version: "9.0.x"
 
       - name: Restore dependencies
-        run: dotnet restore ./babbly-like-service/babbly-like-service.csproj
+        run: dotnet restore ./babbly-like-service.csproj
 
       - name: Build
-        run: dotnet build ./babbly-like-service/babbly-like-service.csproj --no-restore
+        run: dotnet build ./babbly-like-service.csproj --no-restore
 
       - name: Test
-        run: dotnet test ./babbly-like-service/babbly-like-service.csproj --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx"
+        run: dotnet test ./babbly-like-service.csproj --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx"
 
   docker-build-and-push:
     name: Docker Build and Push to Docker Hub
