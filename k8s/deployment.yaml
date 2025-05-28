@@ -16,7 +16,8 @@ spec:
     spec:
       containers:
       - name: babbly-like-service
-        image: youracr.azurecr.io/babbly-like-service:latest # This will be updated by the CI/CD pipeline image tag
+        image: babbly-like-service:latest
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080 # Assuming your app listens on port 8080
         env:
@@ -60,5 +61,5 @@ spec:
             port: 8080
           initialDelaySeconds: 30
           periodSeconds: 20
-      imagePullSecrets:
-      - name: acr-secret # If your ACR requires authentication from K8s cluster 
+      # imagePullSecrets:
+      # - name: acr-secret # If your ACR requires authentication from K8s cluster 
