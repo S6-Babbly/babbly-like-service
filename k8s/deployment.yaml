@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: babbly-like-service
-        image: babbly-like-service:latest
+        image: morrishh/babbly-like-service:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080 # Assuming your app listens on port 8080
