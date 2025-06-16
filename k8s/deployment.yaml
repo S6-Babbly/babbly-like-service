@@ -1,32 +1,32 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: babbly-like-service
+  name: like-service
   labels:
-    app: babbly-like-service
+    app: like-service
 spec:
-  replicas: 2 # Adjust as needed
+  replicas: 1
   selector:
     matchLabels:
-      app: babbly-like-service
+      app: like-service
   template:
     metadata:
       labels:
-        app: babbly-like-service
+        app: like-service
     spec:
       containers:
-      - name: babbly-like-service
+      - name: like-service
         image: morrishh/babbly-like-service:latest
         imagePullPolicy: IfNotPresent
         ports:
-        - containerPort: 8080 # Assuming your app listens on port 8080
+        - containerPort: 8083
         env:
         - name: ASPNETCORE_ENVIRONMENT
-          value: "Production"
+          value: "Development"
         - name: CassandraHosts
           valueFrom:
             secretKeyRef:
-              name: cassandra-secrets # Name of your K8s secret for Cassandra
+              name: cassandra-secrets
               key: CASSANDRA_HOSTS
         - name: CassandraKeyspace
           value: "babbly_likes"
@@ -40,7 +40,10 @@ spec:
             secretKeyRef:
               name: cassandra-secrets
               key: CASSANDRA_PASSWORD
-        # Add other environment variables as needed
+        - name: KAFKA_BOOTSTRAP_SERVERS
+          value: "kafka:9092"
+        - name: KAFKA_LIKE_TOPIC
+          value: "like-events"
         resources:
           limits:
             memory: "512Mi"
@@ -48,17 +51,16 @@ spec:
           requests:
             memory: "256Mi"
             cpu: "250m"
-        # readinessProbe and livenessProbe are highly recommended for production
         readinessProbe:
           httpGet:
-            path: /health # Assuming you have a /health endpoint
-            port: 8080
+            path: /health
+            port: 8083
           initialDelaySeconds: 15
           periodSeconds: 10
         livenessProbe:
           httpGet:
-            path: /health # Assuming you have a /health endpoint
-            port: 8080
+            path: /health
+            port: 8083
           initialDelaySeconds: 30
           periodSeconds: 20
       # imagePullSecrets:
