@@ -82,39 +82,108 @@ namespace babbly_like_service.Controllers
         [HttpPost]
         public async Task<ActionResult<LikeResponse>> AddLike(LikeRequest request)
         {
-            var like = new Like
+            // Get authenticated user ID from JWT headers (forwarded by API Gateway)
+            var userId = Request.Headers["X-User-Id"].FirstOrDefault();
+            if (string.IsNullOrWhiteSpace(userId))
             {
-                PostId = request.PostId,
-                UserId = request.UserId,
-                LikeType = string.IsNullOrEmpty(request.LikeType) ? "default" : request.LikeType
-            };
+                return Unauthorized(new { error = "Authentication required. User ID not found in token." });
+            }
 
-            await _likeRepository.AddLikeAsync(like);
-            return CreatedAtAction(nameof(GetLike), new { id = like.Id }, MapToLikeResponse(like));
+            try
+            {
+                // Check if user already liked this post
+                var existingLike = await _likeRepository.GetLikeByUserAndPostAsync(userId, request.PostId);
+                if (existingLike != null)
+                {
+                    return Conflict(new { error = "User has already liked this post" });
+                }
+
+                var like = new Like
+                {
+                    PostId = request.PostId,
+                    UserId = userId,
+                    LikeType = string.IsNullOrEmpty(request.LikeType) ? "default" : request.LikeType
+                };
+
+                await _likeRepository.AddLikeAsync(like);
+                _logger.LogInformation("User {UserId} liked post {PostId}", userId, request.PostId);
+                return CreatedAtAction(nameof(GetLike), new { id = like.Id }, MapToLikeResponse(like));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error adding like for user {UserId} and post {PostId}", userId, request.PostId);
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         // DELETE api/likes/{id}
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteLike(Guid id)
         {
-            var success = await _likeRepository.DeleteLikeAsync(id);
-            if (!success)
+            // Get authenticated user ID from JWT headers
+            var userId = Request.Headers["X-User-Id"].FirstOrDefault();
+            if (string.IsNullOrWhiteSpace(userId))
             {
-                return NotFound();
+                return Unauthorized(new { error = "Authentication required. User ID not found in token." });
             }
-            return NoContent();
+
+            try
+            {
+                // Check if like exists and belongs to the user
+                var like = await _likeRepository.GetLikeAsync(id);
+                if (like == null)
+                {
+                    return NotFound(new { error = "Like not found" });
+                }
+
+                if (like.UserId != userId)
+                {
+                    return Forbid("You can only delete your own likes");
+                }
+
+                var success = await _likeRepository.DeleteLikeAsync(id);
+                if (!success)
+                {
+                    return NotFound(new { error = "Like not found" });
+                }
+
+                _logger.LogInformation("User {UserId} deleted like {LikeId}", userId, id);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting like {LikeId} for user {UserId}", id, userId);
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         // POST api/likes/unlike
         [HttpPost("unlike")]
         public async Task<ActionResult> UnlikeLike([FromBody] LikeRequest request)
         {
-            var success = await _likeRepository.DeleteLikeByUserAndPostAsync(request.UserId, request.PostId);
-            if (!success)
+            // Get authenticated user ID from JWT headers
+            var userId = Request.Headers["X-User-Id"].FirstOrDefault();
+            if (string.IsNullOrWhiteSpace(userId))
             {
-                return NotFound();
+                return Unauthorized(new { error = "Authentication required. User ID not found in token." });
             }
-            return NoContent();
+
+            try
+            {
+                var success = await _likeRepository.DeleteLikeByUserAndPostAsync(userId, request.PostId);
+                if (!success)
+                {
+                    return NotFound(new { error = "Like not found or user has not liked this post" });
+                }
+
+                _logger.LogInformation("User {UserId} unliked post {PostId}", userId, request.PostId);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error unliking post {PostId} for user {UserId}", request.PostId, userId);
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         private static LikeResponse MapToLikeResponse(Like like)

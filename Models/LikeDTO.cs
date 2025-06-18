@@ -3,7 +3,6 @@ namespace babbly_like_service.Models
     public class LikeRequest
     {
         public Guid PostId { get; set; }
-        public string UserId { get; set; } = string.Empty;
         public string LikeType { get; set; } = "default";
     }
 
