@@ -106,8 +106,21 @@ namespace babbly_like_service.Controllers
                 };
 
                 await _likeRepository.AddLikeAsync(like);
+                
+                // Get updated like count for the post
+                var updatedLikeCount = await _likeRepository.GetLikeCountByPostAsync(request.PostId);
+                
                 _logger.LogInformation("User {UserId} liked post {PostId}", userId, request.PostId);
-                return CreatedAtAction(nameof(GetLike), new { id = like.Id }, MapToLikeResponse(like));
+                
+                // Return response with like count that frontend expects
+                var response = new
+                {
+                    like = MapToLikeResponse(like),
+                    likes = (int)updatedLikeCount,
+                    postId = request.PostId
+                };
+                
+                return CreatedAtAction(nameof(GetLike), new { id = like.Id }, response);
             }
             catch (Exception ex)
             {
