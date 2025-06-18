@@ -210,5 +210,40 @@ namespace babbly_like_service.Controllers
                 LikeType = like.LikeType
             };
         }
+
+        // DELETE api/likes/user/{userId}
+        [HttpDelete("user/{userId}")]
+        public async Task<ActionResult> DeleteAllLikesByUser(string userId)
+        {
+            try
+            {
+                _logger.LogInformation("Deleting all likes for user {UserId}", userId);
+                
+                // Get all likes by the user
+                var userLikes = await _likeRepository.GetLikesByUserAsync(userId);
+                var likesList = userLikes.ToList();
+                
+                _logger.LogInformation("Found {Count} likes to delete for user {UserId}", likesList.Count, userId);
+                
+                // Delete each like
+                int deletedCount = 0;
+                foreach (var like in likesList)
+                {
+                    var success = await _likeRepository.DeleteLikeAsync(like.Id);
+                    if (success)
+                    {
+                        deletedCount++;
+                    }
+                }
+                
+                _logger.LogInformation("Successfully deleted {Count} likes for user {UserId}", deletedCount, userId);
+                return Ok(new { message = $"Deleted {deletedCount} likes for user {userId}" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting likes for user {UserId}", userId);
+                return StatusCode(500, "Internal server error");
+            }
+        }
     }
 } 
