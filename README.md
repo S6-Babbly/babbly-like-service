@@ -1,30 +1,94 @@
 # Babbly Like Service
 
-## Overview
-
-This is the like service for the Babbly social media platform. It's built with ASP.NET Core, providing RESTful API endpoints for managing post likes.
+The like/reaction management microservice for the Babbly platform, providing RESTful API endpoints for managing likes on posts.
 
 ## Tech Stack
 
-* **Backend**: ASP.NET Core 9.0
-* **Database**: Apache Cassandra
-* **Containerization**: Docker
-* **API Documentation**: Swagger/OpenAPI
+- **Backend**: ASP.NET Core 9.0
+- **Database**: Apache Cassandra
+- **Message Broker**: Kafka (for event publishing)
+- **API Documentation**: Swagger/OpenAPI
 
 ## Features
 
-* RESTful API endpoints for like management
-* Add/remove likes from posts
-* Get like counts for posts
-* Get users who liked a post
-* Get posts liked by a user
-* Check if a user liked a post
+- Add and remove likes from posts
+- Get like counts for posts
+- Get users who liked a post
+- Get posts liked by a user
+- Check if a user has liked a specific post
+- Event publishing to Kafka for like operations
+
+## Local Development Setup
+
+### Prerequisites
+
+- .NET SDK 9.0 or later
+- Docker and Docker Compose
+- Apache Cassandra
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/babbly-like-service.git
+   cd babbly-like-service
+   ```
+
+2. Restore dependencies:
+   ```bash
+   dotnet restore
+   ```
+
+3. Configure Cassandra connection:
+   ```bash
+   # Using user secrets for development
+   dotnet user-secrets set "CassandraHosts" "localhost"
+   dotnet user-secrets set "CassandraKeyspace" "babbly_likes"
+   dotnet user-secrets set "CassandraUsername" "cassandra"
+   dotnet user-secrets set "CassandraPassword" "cassandra"
+   ```
+
+4. Run the service:
+   ```bash
+   dotnet run --project babbly-like-service/babbly-like-service.csproj
+   ```
+
+The API will be available at `http://localhost:8083`.
+
+### Database Initialization
+
+The Cassandra keyspace and tables are automatically created on startup.
+
+## Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `CassandraHosts` | Comma-separated Cassandra hosts | `localhost` |
+| `CassandraKeyspace` | Keyspace name | `babbly_likes` |
+| `CassandraUsername` | Database username | `cassandra` |
+| `CassandraPassword` | Database password | `cassandra` |
+
+## API Endpoints
+
+### Like Operations
+- `GET /api/likes/{id}` - Get a specific like by ID
+- `GET /api/likes/post/{postId}` - Get all likes for a post
+- `GET /api/likes/user/{userId}` - Get all likes by a user
+- `GET /api/likes/post/{postId}/count` - Get like count for a post
+- `GET /api/likes/post/{postId}/users` - Get users who liked a post
+- `GET /api/likes/user/{userId}/posts` - Get posts liked by a user
+- `GET /api/likes/check?userId={userId}&postId={postId}` - Check if user liked a post
+- `POST /api/likes` - Add a like
+- `POST /api/likes/unlike` - Remove a like
+- `DELETE /api/likes/{id}` - Delete a like by ID
+
+### Health Check
+- `GET /api/health` - Service health check
 
 ## Database Schema
 
 ### Likes Table
-
-```sql
+```cql
 CREATE TABLE likes (
     id uuid PRIMARY KEY,
     post_id uuid,
@@ -35,82 +99,57 @@ CREATE TABLE likes (
 ```
 
 ### Indices
+- `post_id` index for querying likes by post
+- `user_id` index for querying likes by user
+- `(post_id, user_id)` compound index for checking if a user liked a post
 
-* `post_id` index for querying likes by post
-* `user_id` index for querying likes by user
-* `post_id, user_id` compound index for checking if a user liked a post
+## Docker Support
 
-## Getting Started
+Run the service with Docker Compose:
 
-### Prerequisites
+```bash
+# From the root of the Babbly organization
+docker-compose up -d like-service
+```
 
-* .NET SDK 9.0 or later
-* Docker and Docker Compose
-* Apache Cassandra
+Or run with its own Docker Compose (includes Cassandra):
 
-### Installation
+```bash
+# From the babbly-like-service directory
+docker-compose up -d
+```
 
-1. Clone the repository:
-   ```
-   git clone https://github.com/yourusername/babbly-like-service.git
-   cd babbly-like-service
-   ```
+The service will be available at `http://localhost:8083`.
 
-2. Restore dependencies:
-   ```
-   dotnet restore
-   ```
+## Architecture Notes
 
-3. Set up the Cassandra connection in your environment variables or user secrets:
-   ```
-   # For development, you can use user secrets
-   dotnet user-secrets set "CassandraHosts" "localhost"
-   dotnet user-secrets set "CassandraKeyspace" "babbly_likes"
-   dotnet user-secrets set "CassandraUsername" "cassandra"
-   dotnet user-secrets set "CassandraPassword" "cassandra"
-   ```
+### Why Cassandra?
 
-4. Run the application:
-   ```
-   dotnet run --project babbly-like-service/babbly-like-service.csproj
-   ```
+Cassandra was chosen for the Like Service because:
+- **High write throughput**: Perfect for frequent like/unlike operations
+- **Fast lookups**: Efficient queries for like counts and user-post associations
+- **Horizontal scalability**: Easy to handle viral content with massive like counts
+- **Distributed by design**: Reliable under heavy load
 
-5. The API will be available at http://localhost:5003.
+### Kafka Integration
 
-## Docker Setup
+The service publishes events to the `like-events` Kafka topic:
+- `LikeAdded` - When a user likes a post
+- `LikeRemoved` - When a user unlikes a post
 
-1. Build and start the containers:
-   ```
-   docker-compose up -d
-   ```
+These events can be consumed by other services for real-time notifications or analytics.
 
-2. The services will be available at:
-   * Like Service API: http://localhost:5003
-   * Cassandra: localhost:9042
+### Integration with Babbly Ecosystem
 
-3. To stop the containers:
-   ```
-   docker-compose down
-   ```
-
-## API Endpoints
-
-* `GET /api/likes/{id}` - Get a specific like
-* `GET /api/likes/post/{postId}` - Get all likes for a post
-* `GET /api/likes/user/{userId}` - Get all likes by a user
-* `GET /api/likes/post/{postId}/count` - Get like count for a post
-* `GET /api/likes/post/{postId}/users` - Get users who liked a post
-* `GET /api/likes/user/{userId}/posts` - Get posts liked by a user
-* `GET /api/likes/check?userId={userId}&postId={postId}` - Check if a user liked a post
-* `POST /api/likes` - Add a like
-* `POST /api/likes/unlike` - Remove a like
-* `DELETE /api/likes/{id}` - Delete a like
-* `GET /api/health` - Health check endpoint
+- **API Gateway**: Routes like-related requests to this service
+- **Post Service**: Likes are associated with posts via post ID
+- **User Service**: Likes are associated with users via user ID
+- **Frontend**: Displays like counts and states through the API Gateway
 
 ## Testing
 
-The API can be tested using the included `api-tests.http` file with REST Client extension in Visual Studio Code or similar tools.
+API tests are available in `api-tests.http` for use with REST Client extensions.
 
-## Schema Management
+## License
 
-See [CASSANDRA-MIGRATIONS.md](CASSANDRA-MIGRATIONS.md) for details on how to manage the Cassandra schema. 
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
